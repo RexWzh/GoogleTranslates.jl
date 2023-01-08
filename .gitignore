@@ -6,6 +6,7 @@
 /docs/build/
 
 *.xlsx
+*.txt
 
 .vscode/
 .ipynb_checkpoints/

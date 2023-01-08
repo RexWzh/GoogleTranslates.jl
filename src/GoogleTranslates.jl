@@ -1,11 +1,16 @@
 module GoogleTranslates
 
 using XLSX
-export write_xlsx, read_xlsx
+export
+    # Excel tools
+    write_xlsx, read_xlsx,
+    # markdown tools
+    splitMDtext, mds2temp, getcodes
 
 # Excel tools
 include("xlsx.jl")
 
-# mark
+# markdown tools
+include("markdown.jl")
 
 end
