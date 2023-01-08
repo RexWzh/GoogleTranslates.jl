@@ -1,7 +1,11 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
+
 /Manifest.toml
 /docs/build/
+
+*.xlsx
+
 .vscode/
 .ipynb_checkpoints/

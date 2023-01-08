@@ -1,6 +1,5 @@
 using GoogleTranslates
 using Test
 
-@testset "GoogleTranslates.jl" begin
-    # Write your tests here.
-end
+# Test for Excel tools
+include("tst_xlsx.jl")
