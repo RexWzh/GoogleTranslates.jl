@@ -7,6 +7,7 @@
 
 *.xlsx
 *.txt
+temp*
 
 .vscode/
 .ipynb_checkpoints/

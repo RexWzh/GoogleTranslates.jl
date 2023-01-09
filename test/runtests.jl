@@ -28,6 +28,7 @@ The Rust toolchain provided by BinaryBuilder automatically selects the appropria
 Example of packages using Rust:"""
     txts, codes = splitMDtext(txt)
     @test length(txts) == 5 && length(codes) == 1
+    @test !any(isempty, txts)
     @test_throws ArgumentError splitMDtext(txt * "\n```")
 end
 
@@ -37,4 +38,31 @@ end
     txt = read(file, String)
     @test isfile("temp.xlsx") && isfile("temp.txt")
     @test length(getcodes(read("temp.txt", String))) == count("```", txt) ÷ 2
+end
+
+@testset "Recover markdown from temp files" begin
+    filein = (@__DIR__) * "/testcases/builder_index.md"
+    fileout = (@__DIR__) * "/testcases/temp_builder_index.md"
+    txts, codes = splitMDtext(read(filein, String))
+    mds2temp(filein)
+    temp2mds(fileout)
+    newtxts, newcodes = splitMDtext(read(fileout, String))
+    # note that `filein` and `fileout` are not necessarily the same
+    @test txts == newtxts && codes == newcodes
+end
+
+@testset "Mix raw version and translated version" begin
+    filein = (@__DIR__) * "/testcases/builder_index.md"
+    exceltr = (@__DIR__) * "/testcases/builder_index_tr.xlsx"
+    fileout = (@__DIR__) * "/temp_builder_index_mixed.md"
+    excelout = (@__DIR__) * "/temp_builder_index.xlsx"
+    
+    
+    # generate temp files
+    mds2temp(filein, excel=excelout) # generate temp files
+    # translate
+    run(`cp $excelout $exceltr`) # pretend that we have translated the excel file
+    # mix raw version and translated version
+    temp2mds_mixed(fileout, excelout, exceltr)
+    
 end

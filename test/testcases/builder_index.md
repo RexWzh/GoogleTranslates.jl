@@ -28,19 +28,25 @@ and follow the instructions on-screen.  You can watch an [asciinema demo](https:
 The wizard is a great tool, especially to get started with BinaryBuilder and create your first simple recipes for new packages.  However, it lacks the full control of all options you can use in a `build_tarballs.jl` script.  To generate this file (explained in greater detail in [Building Packages](building.md)), one can clone `Yggdrasil`, copy an existing build recipe, modify it, and submit a new pull request.  Manually editing the `build_tarballs.jl` script is also the recommended way when you want to update an existing recipe, rather then starting from scratch with the wizard.
 
 The `build_tarballs.jl` script can be used as a command line utility, it takes a few options and as argument the list of triplets of the targets.  You can find more information about the syntax of the script in the [Command Line](@ref) section or by running
+
 ```
 julia build_tarballs.jl --help
 ```
+
 You can build the tarballs with
+
 ```
 julia build_tarballs.jl --debug --verbose
 ```
+
 The `--debug` option will drop you into the BinaryBuilder interactive shell if an error occurs.  If the build fails, after finding out the steps needed to fix the build you have to manually update the script in `build_tarballs.jl`.  You should run again the above command to make sure that everything is actually working.
 
 Since `build_tarballs.jl` takes as argument the comma-separated list of [triplets](@ref Platforms) for which to build the tarballs, you can select only a few of them.  For example, with
+
 ```
 julia build_tarballs.jl --debug --verbose aarch64-linux-musl,arm-linux-musleabihf
 ```
+
 you'll run the build script only for the `aarch64-linux-musl` and `arm-linux-musleabihf` target platforms.
 
 If you decide to use this workflow, however, you will need to manually open pull requests for [Yggdrasil](https://github.com/JuliaPackaging/Yggdrasil/).
@@ -58,18 +64,25 @@ If you already have access to the [GitHub Codespaces](https://github.com/feature
 > [Reproducible builds](https://reproducible-builds.org/) are a set of software development practices that create an independently-verifiable path from source to binary code.
 
 `BinaryBuilder.jl` puts into place many of the practices needed to achieve reproducible builds.
+
 For example, the building environment is sandboxed and uses a fixed tree structure, thus having a reproducible [build path](https://reproducible-builds.org/docs/build-path/).
+
 The toolchain used by `BinaryBuilder.jl` also sets some [environment variables](https://reproducible-builds.org/docs/source-date-epoch/) and enforces [certain compiler flags](https://reproducible-builds.org/docs/randomness/) which help reproducibility.
 
 While `BinaryBuilder.jl` does not guarantee to always have reproducible builds, it achieves this goal in most cases.
+
 Reproducibility in `BinaryBuilder.jl` includes also the generated tarballs: they are created with [`Tar.jl`](https://github.com/JuliaIO/Tar.jl), which takes [a few measures](https://github.com/JuliaIO/Tar.jl/blob/1de4f92dc1ba4de4b54ac5279ec1d84fb15948f6/README.md#reproducibility) to ensure reproducibility of tarballs with the same git tree hash.
+
 If you rebuild multiple times the same package, with the same version of BinaryBuilder, the generated tarball which contains the main products (i.e. not the log files which are known not to be reproducible) should always have the same git tree hash and SHA256 sum, information which are printed to screen at the end of the build process and stored in the `Artifacts.toml` file of the [JLL package](@ref JLL-packages).
 
 There are however some caveats:
 
 * reproducibility can only be expected when using the toolchain offered by `BinaryBuilder.jl`;
+
 * there are [very specific cases](https://github.com/JuliaPackaging/BinaryBuilder.jl/issues/1230) where the macOS C/C++ toolchain does not produce reproducible binaries.
+
   This happens when doing debug builds (`-g` flag) _and_ not building object files with deterministic names separately (e.g. if directly building and linking a program or a shared library from the source file, letting the compiler create the intermediate object files automatically with random names).
+
   We have decided not to take action for this case because in practice most packages use build systems which compile intermediate object files with deterministic names (which is also the only way to take advantage of `ccache`, which `BinaryBuilder.jl` uses extensively) and typically do not do debug builds, thus sidestepping the issue entirely.
 
 ## Videos and tutorials
@@ -77,8 +90,14 @@ There are however some caveats:
 BinaryBuilder has been covered in some videos, you may want to check them out if you want to know more about the framework (the date is specified in parentheses, to make it clear how old/new the videos are):
 
 * [10 tips on how to build better binaries](https://www.youtube.com/watch?v=2e0PBGSaQaI): JuliaCon 2018 talk by Elliot Saba introducing an early version of BinaryBuilder (2018-08-09)
+
 * [Introduction to BinaryBuilder.jl](https://www.youtube.com/watch?v=d_h8C4iCzno): live building session by Mosè Giordano (2020-04-10)
+
 * [BinaryBuilder.jl - The Subtle Art of Binaries That Just Work](https://www.youtube.com/watch?v=3IyXsBwqll8): JuliaCon 2020 workshop by Elliot Saba and Mosè Giordano to guide users through the use of BinaryBuilder (2020-07-25)
+
 * [Your first BinaryBuilder.jl recipe with Julia](https://www.youtube.com/watch?v=7fkNcdbt4dg): live building by Miguel Raz Guzmán Macedo (2021-04-07)
+
 * [BinaryBuilder.jl — The Subtle Art of Binaries That "Just Work"](https://bbb.dereferenced.org/playback/presentation/2.3/75a49eebcb63d6fee8c55417ea7cc51768d86f3d-1621065511930): AlpineConf 2021 talk by Elliot Saba and Mosè Giordano, starts at 4:19:00 (2021-05-15)
+
 * [BinaryBuilder.jl — Using Julia's Pkg to deliver binary libraries](https://www.youtube.com/watch?v=S__x3K31qnE): PackagingCon 2021 talk by Mosè Giordano & Elliot Saba (2021-11-10)
+
