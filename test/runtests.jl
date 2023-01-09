@@ -45,7 +45,7 @@ end
     fileout = (@__DIR__) * "/testcases/temp_builder_index.md"
     txts, codes = splitMDtext(read(filein, String))
     mds2temp(filein)
-    temp2mds(fileout)
+    temp2mds("temp.xlsx", "temp.txt", fileout)
     newtxts, newcodes = splitMDtext(read(fileout, String))
     # note that `filein` and `fileout` are not necessarily the same
     @test txts == newtxts && codes == newcodes
@@ -57,12 +57,10 @@ end
     fileout = (@__DIR__) * "/temp_builder_index_mixed.md"
     excelout = (@__DIR__) * "/temp_builder_index.xlsx"
     
-    
     # generate temp files
     mds2temp(filein, excel=excelout) # generate temp files
     # translate
     run(`cp $excelout $exceltr`) # pretend that we have translated the excel file
     # mix raw version and translated version
-    temp2mds_mixed(fileout, excelout, exceltr)
-    
+    temp2mixmds(fileout, excelout, exceltr)
 end

@@ -72,9 +72,9 @@ getcodes(txt::AbstractString) = split(strip(txt), "\n\n")
 
 Recover markdown files from temp files.
 """
-function temp2mds( filesout::AbstractVector{<:AbstractString}
-                 ; info::AbstractString="temp.txt"
-                 , excel::AbstractString="temp.xlsx")
+function temp2mds( excel::AbstractString
+                 , info::AbstractString
+                 , filesout::AbstractVector{<:AbstractString})
     all(endswith(".md"), filesout) || throw(ArgumentError("Only markdown files are allowed"))
     codes = getcodes(read(info, String))
     txtmat = read_xlsx(excel)
@@ -91,15 +91,15 @@ function temp2mds( filesout::AbstractVector{<:AbstractString}
     end
     return "output files: $(join(filesout, ", "))"
 end
-temp2mds( fileout::AbstractString
-        ; info::AbstractString="temp.txt"
-        , excel::AbstractString="temp.xlsx") = temp2mds([fileout]; excel=excel, info=info)
+temp2mds( excel::AbstractString
+        , info::AbstractString
+        , fileout::AbstractString) = temp2mds(excel, info, [fileout])
 
 
-function temp2mds_mixed( filesout::AbstractVector{<:AbstractString}
-                       , excelraw::AbstractString
-                       , exceltr::AbstractString
-                       ; info::AbstractString="temp.txt")
+function temp2mixmds( filesout::AbstractVector{<:AbstractString}
+                    , excelraw::AbstractString
+                    , exceltr::AbstractString
+                    ; info::AbstractString)
     all(endswith(".md"), filesout) || throw(ArgumentError("Only markdown files are allowed"))
     codes = getcodes(read(info, String))
     txtmat, txtmattr = read_xlsx(excelraw), read_xlsx(exceltr)
@@ -117,7 +117,7 @@ function temp2mds_mixed( filesout::AbstractVector{<:AbstractString}
     end
     return "output files: $(join(filesout, ", "))"
 end
-temp2mds_mixed( file::AbstractString
-              , excelraw::AbstractString
-              , exceltr::AbstractString
-              ; info::AbstractString="temp.txt") = temp2mds_mixed([file], excelraw, exceltr; info=info)
+temp2mixmds( file::AbstractString
+           , excelraw::AbstractString
+           , exceltr::AbstractString
+           ; info::AbstractString="temp.txt") = temp2mixmds([file], excelraw, exceltr; info=info)
