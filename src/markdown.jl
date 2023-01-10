@@ -49,7 +49,7 @@ function mds2temp( filesin::AbstractVector{<:AbstractString}
         end
     end
     matsize = maximum(length, alltxts)
-    txtmat = Matrix{String}(undef, matsize, length(filesin))
+    txtmat = fill("", matsize, length(filesin)) # should not use `Matrix{String}(undef,...)` here!!
     for (i, txts) in enumerate(alltxts)
         txtmat[1:length(txts), i] = txts # each column is a file
     end
