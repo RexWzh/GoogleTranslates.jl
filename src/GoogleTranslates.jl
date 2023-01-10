@@ -6,7 +6,7 @@ export
     write_xlsx, read_xlsx,
     # markdown tools
     splitMDtext, mds2temp, getcodes,
-    temp2mds, temp2mds_mixed
+    temp2mds, temp2mixmds
 
 # Excel tools
 include("xlsx.jl")

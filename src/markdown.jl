@@ -1,7 +1,7 @@
 """
     splitMDtext(text::AbstractString)
 
-Split a markdown text into a list of markdown blocks.
+Split a markdown text into a list of text blocks and a list of code blocks.
 """
 function splitMDtext(text::AbstractString)
     lines = split(text, '\n')
@@ -9,17 +9,18 @@ function splitMDtext(text::AbstractString)
     
     incode = false
     for line in lines
+        line = "\n" * line
         if startswith(line, r"\s*```")
             incode = !incode
             if incode # start a new code block
-                push!(codes, "\n" * line)
+                push!(codes, line)
                 push!(txts, "`C`") # mark the code block
             else
-                codes[end] *= "\n" * line
+                codes[end] *= line
             end
         elseif incode
-            codes[end] *= "\n" * line
-        elseif !isempty(line) # skip empty lines
+            codes[end] *= line
+        elseif line!="\n" # skip empty lines
             push!(txts, line)
         end
     end
@@ -30,32 +31,34 @@ end
 """
     mds2temp( filesin::AbstractVector{<:AbstractString}
             , excel::AbstractString="temp.xlsx"
-            , info::AbstractString="temp.txt")
+            , code::AbstractString="temp.txt")
 
-Convert markdown files to temp files.
+Convert markdown files to tow files: `excel` and `code`.
+
+Here `excel` is the part we need to translate, and `code` stores the code blocks.
 """
 function mds2temp( filesin::AbstractVector{<:AbstractString}
                  ; excel::AbstractString="temp.xlsx"
-                 , info::AbstractString="temp.txt")
+                 , code::AbstractString="temp.txt")
     all(endswith(".md"), filesin) || throw(ArgumentError("Only markdown files are allowed"))
     alltxts = Vector{Vector{String}}(undef, length(filesin))
-    infoio = open(info, "w")
-    for (i, file) in enumerate(filesin)
-        alltxts[i], codes = splitMDtext(read(file, String))
-        println.(Ref(infoio), codes)
+    open(code, "w") do io
+        for (i, file) in enumerate(filesin)
+            alltxts[i], codes = splitMDtext(read(file, String))
+            println.(Ref(io), codes)
+        end
     end
-    close(infoio)
     matsize = maximum(length, alltxts)
-    txtmat = fill("", matsize, length(filesin))
+    txtmat = fill("", matsize, length(filesin)) # should not use `Matrix{String}(undef,...)` here!!
     for (i, txts) in enumerate(alltxts)
-        txtmat[1:length(txts), i] = txts
+        txtmat[1:length(txts), i] = txts # each column is a file
     end
     write_xlsx(excel, txtmat)
-    return "output files: $excel, $info"
+    return "output files: $excel, $code"
 end
 mds2temp( filein::AbstractString
         ; excel::AbstractString="temp.xlsx"
-        , info::AbstractString="temp.txt") = mds2temp([filein]; excel=excel, info=info)
+        , code::AbstractString="temp.txt") = mds2temp([filein]; excel=excel, code=code)
 
 
 """
@@ -63,20 +66,20 @@ mds2temp( filein::AbstractString
 
 Get the code blocks from `txt`.
 """
-getcodes(txt::AbstractString) = split(strip(txt), "\n\n")
+getcodes(txt::AbstractString) = [m.match for m in eachmatch(r"```\w*[\s\S]*?```", txt)]
 
 """
     temp2mds( files::AbstractVector{<:AbstractString}
-            , info::AbstractString="temp.txt"
+            , code::AbstractString="temp.txt"
             , excel::AbstractString="temp.xlsx")
 
 Recover markdown files from temp files.
 """
-function temp2mds( filesout::AbstractVector{<:AbstractString}
-                 ; info::AbstractString="temp.txt"
-                 , excel::AbstractString="temp.xlsx")
+function temp2mds( excel::AbstractString
+                 , code::AbstractString
+                 , filesout::AbstractVector{<:AbstractString})
     all(endswith(".md"), filesout) || throw(ArgumentError("Only markdown files are allowed"))
-    codes = getcodes(read(info, String))
+    codes = getcodes(read(code, String))
     txtmat = read_xlsx(excel)
     startind = 1
     for (i, file) in enumerate(filesout)
@@ -91,23 +94,25 @@ function temp2mds( filesout::AbstractVector{<:AbstractString}
     end
     return "output files: $(join(filesout, ", "))"
 end
-temp2mds( fileout::AbstractString
-        ; info::AbstractString="temp.txt"
-        , excel::AbstractString="temp.xlsx") = temp2mds([fileout]; excel=excel, info=info)
+temp2mds( excel::AbstractString
+        , code::AbstractString
+        , fileout::AbstractString) = temp2mds(excel, code, [fileout])
 
 
-function temp2mds_mixed( filesout::AbstractVector{<:AbstractString}
-                       , excelraw::AbstractString
-                       , exceltr::AbstractString
-                       ; info::AbstractString="temp.txt")
+function temp2mixmds( filesout::AbstractVector{<:AbstractString}
+                    , excelraw::AbstractString
+                    , exceltr::AbstractString
+                    ; code::AbstractString="temp.txt")
     all(endswith(".md"), filesout) || throw(ArgumentError("Only markdown files are allowed"))
-    codes = getcodes(read(info, String))
+    codes = getcodes(read(code, String))
+    codeind = 1
     txtmat, txtmattr = read_xlsx(excelraw), read_xlsx(exceltr)
-    for (i, file) in enumerate(filesout)
+    for (i, file) in enumerate(filesout) # enumerate over each file
         open(file, "w") do io
             for (txt, txttr) in @views zip(txtmat[:, i], txtmattr[:, i])
                 if txt == "`C`"
-                    println(io, codes, '\n')
+                    println(io, codes[codeind], '\n')
+                    codeind += 1
                 else
                     println(io, txt, '\n')
                     println(io, strip(txttr), '\n')
@@ -115,9 +120,9 @@ function temp2mds_mixed( filesout::AbstractVector{<:AbstractString}
             end
         end
     end
-    return "output files: $(join(filesout, ", "))"
+    return "output files:\n$(join(filesout, "\n"))"
 end
-temp2mds_mixed( file::AbstractString
-              , excelraw::AbstractString
-              , exceltr::AbstractString
-              ; info::AbstractString="temp.txt") = temp2mds_mixed([file], excelraw, exceltr; info=info)
+temp2mixmds( file::AbstractString
+           , excelraw::AbstractString
+           , exceltr::AbstractString
+           ; code::AbstractString="temp.txt") = temp2mixmds([file], excelraw, exceltr; code=code)
