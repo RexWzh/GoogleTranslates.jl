@@ -2,12 +2,10 @@
 *.jl.cov
 *.jl.mem
 
-/Manifest.toml
+Manifest.toml
 /docs/build/
-
-*.xlsx
-*.txt
-temp*
 
 .vscode/
 .ipynb_checkpoints/
+
+/test/testcases/
