@@ -110,6 +110,7 @@ function temp2mixmds( filesout::AbstractVector{<:AbstractString}
     for (i, file) in enumerate(filesout) # enumerate over each file
         open(file, "w") do io
             for (txt, txttr) in @views zip(txtmat[:, i], txtmattr[:, i])
+                txt == "missing" && break
                 if txt == "`C`"
                     println(io, codes[codeind], '\n')
                     codeind += 1
