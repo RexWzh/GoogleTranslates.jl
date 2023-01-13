@@ -29,6 +29,38 @@ function splitMDtext(text::AbstractString)
 end
 
 """
+    tighten(text::AbstractString)
+
+Combine splited lines into one.
+"""
+function tighten(text::AbstractString)
+    lines = split(text, '\n')
+    tighttext = ""
+    incode, newtext = false, true
+    for line in lines
+        linen = line * "\n"
+        if startswith(line, r"\s*```")
+            incode, newtext = !incode, true
+            tighttext *= linen
+        elseif incode
+            tighttext *= linen
+        else
+            if isempty(line) || startswith(line, r"([*#!-]|)")
+                tighttext *= linen
+                newtext = true
+            elseif newtext
+                tighttext *= linen
+                newtext = false
+            else
+                tighttext = tighttext[1:end-1] * " " * linen
+                newtext = false
+            end
+        end
+    end
+    return tighttext
+end
+
+"""
     mds2temp( filesin::AbstractVector{<:AbstractString}
             , excel::AbstractString="temp.xlsx"
             , code::AbstractString="temp.txt")
