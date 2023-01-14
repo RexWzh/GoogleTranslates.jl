@@ -1,6 +1,3 @@
-```@meta
-CurrentModule = GoogleTranslates
-```
 
 # GoogleTranslates
 
@@ -9,6 +6,4 @@ Documentation for [GoogleTranslates](https://github.com/RexWzh/GoogleTranslates.
 ```@index
 ```
 
-```@autodocs
-Modules = [GoogleTranslates]
-```
+version 2
