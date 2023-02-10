@@ -70,7 +70,7 @@ exceltr = joinpath(tmpfilepath, "temp_tr.xlsx")
 
 mds2temp(filein, excel=excel, code=code)
 
-println("Please translate the excel file:\n\t$excel\n")
+println("Please translate the excel file:\n\t$excel\n\nlink: https://translate.google.com/?sl=auto&tl=en&op=docs\n")
 println("Then place the translated file here:\n\t$exceltr\n")
 
 if args["debug"]
