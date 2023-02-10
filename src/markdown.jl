@@ -28,6 +28,38 @@ function splitMDtext(text::AbstractString)
     return txts, codes
 end
 
+# """
+#     tighten(text::AbstractString)
+
+# Combine splited lines into one.
+# """
+# function tighten(text::AbstractString)
+#     lines = split(text, '\n')
+#     tighttext = ""
+#     incode, newtext = false, true
+#     for line in lines
+#         linen = line * "\n"
+#         if startswith(line, r"\s*```")
+#             incode, newtext = !incode, true
+#             tighttext *= linen
+#         elseif incode
+#             tighttext *= linen
+#         else
+#             if isempty(line) || startswith(line, r"([*#!-]|)")
+#                 tighttext *= linen
+#                 newtext = true
+#             elseif newtext
+#                 tighttext *= linen
+#                 newtext = false
+#             else
+#                 tighttext = tighttext[1:end-1] * " " * linen
+#                 newtext = false
+#             end
+#         end
+#     end
+#     return tighttext
+# end
+
 """
     mds2temp( filesin::AbstractVector{<:AbstractString}
             , excel::AbstractString="temp.xlsx"
@@ -110,6 +142,7 @@ function temp2mixmds( filesout::AbstractVector{<:AbstractString}
     for (i, file) in enumerate(filesout) # enumerate over each file
         open(file, "w") do io
             for (txt, txttr) in @views zip(txtmat[:, i], txtmattr[:, i])
+                txt == "missing" && break
                 if txt == "`C`"
                     println(io, codes[codeind], '\n')
                     codeind += 1
@@ -120,7 +153,7 @@ function temp2mixmds( filesout::AbstractVector{<:AbstractString}
             end
         end
     end
-    return "output files:\n$(join(filesout, "\n"))"
+    return "output files:\n\n$(join(filesout, "\n"))"
 end
 temp2mixmds( file::AbstractString
            , excelraw::AbstractString

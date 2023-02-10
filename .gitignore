@@ -9,3 +9,4 @@ Manifest.toml
 .ipynb_checkpoints/
 
 /test/testcases/
+.DS_Store
