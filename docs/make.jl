@@ -8,11 +8,6 @@ makedocs(;
     authors="rex <1073853456@qq.com> and contributors",
     repo="https://github.com/RexWzh/GoogleTranslates.jl/blob/{commit}{path}#{line}",
     sitename="GoogleTranslates.jl",
-    format=Documenter.HTML(;
-        canonical="https://RexWzh.github.io/GoogleTranslates.jl",
-        edit_link="main",
-        assets=String[],
-    ),
     pages=[
         "Home" => "index.md",
     ],
@@ -20,6 +15,7 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/RexWzh/GoogleTranslates.jl",
-    devbranch="main",
-    versions = ["v^"]
+    devurl = "dev",
+    devbranch="dev",
+    versions = ["stable" => "v^", "dev" => "dev"]
 )

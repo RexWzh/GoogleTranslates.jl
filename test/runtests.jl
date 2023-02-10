@@ -117,3 +117,12 @@ end
     run(`cp $excel $exceltr`) # pretend that we have translated the excel file
     temp2mixmds(fileout, excel, exceltr;code=code)
 end
+
+@testset "Use script" begin
+    mkpath("$testpath/sourcepath")
+    open("$testpath/sourcepath/test.md", "w") do io
+        write(io, "# Hello World\nThis is a test.\n\`\`\`julia\nprintln(123)\n\`\`\`")
+    end
+    run(`julia scripts/translate.jl -s $testpath/sourcepath -t $testpath/translatedpath -d`)
+    @test isfile("$testpath/translatedpath/test.md")
+end
